@@ -143,6 +143,30 @@ Feature-by-feature competitive analysis covering:
 
 ---
 
+### 6. **VENDOR_COMPARISON_CLICK2DASH_VS_OLELO.md**
+Head-to-head evaluation of two franchise-approved vendors (~$400/month each) covering:
+- Use case coverage matrix against our 5 core requirements
+- Feature-by-feature comparison with winner assessments
+- Reported results analysis with confidence ratings
+- Risk analysis for each vendor
+- Decision framework (when to choose which)
+- Demo checklist with vendor-specific questions
+- Weighted scoring summary (18.0 vs 17.0 out of 25)
+
+**Vendors Analyzed**:
+- PW Media Click2Dash / InsightsAI (audio coaching, mobile apps, marketing attribution)
+- Olelo AI (manager rescue alerts, fast deployment, conversion optimization)
+
+**Use Cases**:
+- Vendor selection for franchise-approved call intelligence
+- Demo preparation and question planning
+- Gap analysis for outbound sales scoring needs
+- Build vs. buy decision support
+
+**Key Insight**: Both vendors score 68-72% against our requirements. The critical gap is outbound sales call scoring (Use Case #3) — neither vendor explicitly addresses it. Demo experience and outbound scoring answer should be the tiebreaker.
+
+---
+
 ## 🎯 How to Use These Documents
 
 ### For Investor Pitches:
@@ -277,7 +301,8 @@ business-use-cases/
 ├── BUSINESS_CASE_ASSUMPTIONS.md
 ├── BUSINESS_CASE_QUESTIONNAIRE.md
 ├── BUSINESS_USE_CASES_FAQ.md
-└── COMPETITOR_COMPARISON.md
+├── COMPETITOR_COMPARISON.md
+└── VENDOR_COMPARISON_CLICK2DASH_VS_OLELO.md
 ```
 
 ---
