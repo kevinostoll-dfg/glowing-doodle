@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "call-intelligence.fullname" . }}-api-gateway
+  labels:
+    {{- include "call-intelligence.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api-gateway
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.apiGateway.port }}
+      targetPort: {{ .Values.apiGateway.port }}
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/component: api-gateway
+    {{- include "call-intelligence.selectorLabels" . | nindent 4 }}

@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "call-intelligence.fullname" . }}-voice-agent
+  labels:
+    {{- include "call-intelligence.labels" . | nindent 4 }}
+    app.kubernetes.io/component: voice-agent
+spec:
+  replicas: {{ .Values.voiceAgent.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: voice-agent
+      {{- include "call-intelligence.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: voice-agent
+        {{- include "call-intelligence.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: voice-agent
+          image: "{{ .Values.global.imageRegistry }}/{{ .Values.voiceAgent.image.repository }}:{{ .Values.voiceAgent.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.voiceAgent.port }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "call-intelligence.fullname" . }}-config
+            - secretRef:
+                name: {{ include "call-intelligence.fullname" . }}-secrets
+          resources:
+            {{- toYaml .Values.voiceAgent.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.voiceAgent.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.voiceAgent.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10

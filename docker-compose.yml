@@ -1,0 +1,127 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: calliq
+      POSTGRES_PASSWORD: calliq
+      POSTGRES_DB: calliq
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U calliq"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://calliq:calliq@postgres:5432/calliq
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./shared:/app/shared
+
+  call-handler:
+    build:
+      context: .
+      dockerfile: services/call-handler/Dockerfile
+    ports:
+      - "8001:8001"
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://calliq:calliq@postgres:5432/calliq
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./shared:/app/shared
+
+  voice-agent:
+    build:
+      context: .
+      dockerfile: services/voice-agent/Dockerfile
+    ports:
+      - "8002:8002"
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://calliq:calliq@postgres:5432/calliq
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./shared:/app/shared
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: services/workers/Dockerfile
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://calliq:calliq@postgres:5432/calliq
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./shared:/app/shared
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: services/workers/Dockerfile
+    command: celery -A app.celery_app beat --loglevel=info
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://calliq:calliq@postgres:5432/calliq
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./shared:/app/shared
+
+  dashboard:
+    build:
+      context: ./services/dashboard
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - api-gateway
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: call-scoring-batch
+  namespace: call-intelligence
+spec:
+  entrypoint: score-batch
+  arguments:
+    parameters:
+      - name: shop-id
+        value: ""
+      - name: start-date
+        value: ""
+      - name: end-date
+        value: ""
+  templates:
+    - name: score-batch
+      container:
+        image: registry.digitalocean.com/calliq/jobs:latest
+        command: ["python", "score_calls.py"]
+        args:
+          - "--shop-id"
+          - "{{workflow.parameters.shop-id}}"
+          - "--start-date"
+          - "{{workflow.parameters.start-date}}"
+          - "--end-date"
+          - "{{workflow.parameters.end-date}}"
+        envFrom:
+          - secretRef:
+              name: call-intelligence-secrets
+        resources:
+          requests:
+            cpu: "1"
+            memory: 1Gi
+          limits:
+            cpu: "2"
+            memory: 2Gi

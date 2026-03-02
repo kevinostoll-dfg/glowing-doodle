@@ -1,0 +1,84 @@
+version: "3.8"
+
+services:
+  api-gateway:
+    image: registry.digitalocean.com/calliq/api-gateway:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    volumes: []
+
+  call-handler:
+    image: registry.digitalocean.com/calliq/call-handler:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: services/call-handler/Dockerfile
+    ports: []
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+    volumes: []
+
+  voice-agent:
+    image: registry.digitalocean.com/calliq/voice-agent:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: services/voice-agent/Dockerfile
+    ports: []
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    volumes: []
+
+  celery-worker:
+    image: registry.digitalocean.com/calliq/worker:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: services/workers/Dockerfile
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+    volumes: []
+
+  celery-beat:
+    image: registry.digitalocean.com/calliq/worker:${TAG:-latest}
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+    volumes: []
+
+  dashboard:
+    image: registry.digitalocean.com/calliq/dashboard:${TAG:-latest}
+    build:
+      context: ./services/dashboard
+      dockerfile: Dockerfile
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M

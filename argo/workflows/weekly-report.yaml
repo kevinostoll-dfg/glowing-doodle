@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: weekly-report
+  namespace: call-intelligence
+spec:
+  schedule: "0 8 * * 1"
+  timezone: "America/New_York"
+  concurrencyPolicy: Replace
+  workflowSpec:
+    entrypoint: weekly-report
+    templates:
+      - name: weekly-report
+        container:
+          image: registry.digitalocean.com/calliq/jobs:latest
+          command: ["python", "generate_report.py"]
+          args: ["--type", "weekly"]
+          envFrom:
+            - secretRef:
+                name: call-intelligence-secrets
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi

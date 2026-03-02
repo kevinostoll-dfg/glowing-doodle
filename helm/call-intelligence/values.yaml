@@ -1,0 +1,126 @@
+global:
+  imageRegistry: registry.digitalocean.com/calliq
+  imagePullPolicy: IfNotPresent
+
+apiGateway:
+  replicas: 2
+  image:
+    repository: api-gateway
+    tag: latest
+  port: 8000
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+  env:
+    LOG_LEVEL: INFO
+
+callHandler:
+  replicas: 2
+  image:
+    repository: call-handler
+    tag: latest
+  port: 8001
+  resources:
+    requests:
+      cpu: 250m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+voiceAgent:
+  replicas: 2
+  image:
+    repository: voice-agent
+    tag: latest
+  port: 8002
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+
+worker:
+  replicas: 2
+  image:
+    repository: worker
+    tag: latest
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+  queues: transcription,analysis,notification
+
+dashboard:
+  replicas: 1
+  image:
+    repository: dashboard
+    tag: latest
+  port: 80
+  resources:
+    requests:
+      cpu: 100m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 128Mi
+
+ingress:
+  enabled: true
+  className: nginx
+  host: calls.example.com
+  tls:
+    enabled: true
+    secretName: call-intelligence-tls
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+
+hpa:
+  enabled: false
+  apiGateway:
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilization: 70
+  callHandler:
+    minReplicas: 2
+    maxReplicas: 8
+    targetCPUUtilization: 70
+
+postgresql:
+  enabled: true
+  auth:
+    username: calliq
+    password: calliq
+    database: calliq
+
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+
+config:
+  corsOrigins: "https://calls.example.com"
+  logLevel: INFO
+
+secrets:
+  twilioAccountSid: ""
+  twilioAuthToken: ""
+  openaiApiKey: ""
+  deepgramApiKey: ""
+  anthropicApiKey: ""
+  s3Endpoint: ""
+  s3Bucket: call-recordings
+  s3AccessKey: ""
+  s3SecretKey: ""

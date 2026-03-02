@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: daily-analytics
+  namespace: call-intelligence
+spec:
+  schedule: "0 6 * * *"
+  timezone: "America/New_York"
+  concurrencyPolicy: Replace
+  workflowSpec:
+    entrypoint: daily-analytics
+    templates:
+      - name: daily-analytics
+        steps:
+          - - name: score-unscored-calls
+              template: score-calls
+          - - name: generate-digest
+              template: daily-digest
+
+      - name: score-calls
+        container:
+          image: registry.digitalocean.com/calliq/jobs:latest
+          command: ["python", "score_calls.py"]
+          args: ["--date", "yesterday"]
+          envFrom:
+            - secretRef:
+                name: call-intelligence-secrets
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+
+      - name: daily-digest
+        container:
+          image: registry.digitalocean.com/calliq/jobs:latest
+          command: ["python", "generate_report.py"]
+          args: ["--type", "daily", "--date", "yesterday"]
+          envFrom:
+            - secretRef:
+                name: call-intelligence-secrets
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

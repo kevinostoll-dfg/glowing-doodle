@@ -1,0 +1,62 @@
+apiGateway:
+  replicas: 3
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 1Gi
+
+callHandler:
+  replicas: 3
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+
+voiceAgent:
+  replicas: 3
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 1Gi
+
+worker:
+  replicas: 4
+  resources:
+    requests:
+      cpu: "1"
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+
+dashboard:
+  replicas: 2
+
+ingress:
+  host: calls.example.com
+  tls:
+    secretName: call-intelligence-tls
+
+hpa:
+  enabled: true
+  apiGateway:
+    minReplicas: 3
+    maxReplicas: 15
+    targetCPUUtilization: 65
+  callHandler:
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilization: 65
+
+config:
+  corsOrigins: "https://calls.example.com"
+  logLevel: WARNING

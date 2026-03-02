@@ -1,0 +1,9 @@
+celery[redis]>=5.4
+sqlalchemy>=2.0
+psycopg2-binary>=2.9
+httpx>=0.27
+boto3>=1.34
+anthropic>=0.28
+deepgram-sdk>=3.5
+pydantic>=2.7
+pydantic-settings>=2.3

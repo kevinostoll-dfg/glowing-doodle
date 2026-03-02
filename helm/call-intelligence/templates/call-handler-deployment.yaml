@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "call-intelligence.fullname" . }}-call-handler
+  labels:
+    {{- include "call-intelligence.labels" . | nindent 4 }}
+    app.kubernetes.io/component: call-handler
+spec:
+  replicas: {{ .Values.callHandler.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: call-handler
+      {{- include "call-intelligence.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: call-handler
+        {{- include "call-intelligence.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: call-handler
+          image: "{{ .Values.global.imageRegistry }}/{{ .Values.callHandler.image.repository }}:{{ .Values.callHandler.image.tag }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.callHandler.port }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "call-intelligence.fullname" . }}-config
+            - secretRef:
+                name: {{ include "call-intelligence.fullname" . }}-secrets
+          resources:
+            {{- toYaml .Values.callHandler.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.callHandler.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.callHandler.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10

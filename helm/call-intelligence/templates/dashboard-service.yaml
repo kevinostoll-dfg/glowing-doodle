@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "call-intelligence.fullname" . }}-dashboard
+  labels:
+    {{- include "call-intelligence.labels" . | nindent 4 }}
+    app.kubernetes.io/component: dashboard
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.dashboard.port }}
+      targetPort: {{ .Values.dashboard.port }}
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/component: dashboard
+    {{- include "call-intelligence.selectorLabels" . | nindent 4 }}

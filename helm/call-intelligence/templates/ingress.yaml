@@ -1,0 +1,52 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "call-intelligence.fullname" . }}
+  labels:
+    {{- include "call-intelligence.labels" . | nindent 4 }}
+  annotations:
+    {{- range $key, $value := .Values.ingress.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host }}
+      secretName: {{ .Values.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: /api/
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "call-intelligence.fullname" . }}-api-gateway
+                port:
+                  number: {{ .Values.apiGateway.port }}
+          - path: /webhooks/
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "call-intelligence.fullname" . }}-api-gateway
+                port:
+                  number: {{ .Values.apiGateway.port }}
+          - path: /ws/
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "call-intelligence.fullname" . }}-voice-agent
+                port:
+                  number: {{ .Values.voiceAgent.port }}
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "call-intelligence.fullname" . }}-dashboard
+                port:
+                  number: {{ .Values.dashboard.port }}
+{{- end }}

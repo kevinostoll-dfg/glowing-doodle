@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "call-intelligence.fullname" . }}-voice-agent
+  labels:
+    {{- include "call-intelligence.labels" . | nindent 4 }}
+    app.kubernetes.io/component: voice-agent
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.voiceAgent.port }}
+      targetPort: {{ .Values.voiceAgent.port }}
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/component: voice-agent
+    {{- include "call-intelligence.selectorLabels" . | nindent 4 }}

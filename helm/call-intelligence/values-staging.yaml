@@ -1,0 +1,40 @@
+apiGateway:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+callHandler:
+  replicas: 1
+
+voiceAgent:
+  replicas: 1
+
+worker:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+dashboard:
+  replicas: 1
+
+ingress:
+  host: staging-calls.example.com
+  tls:
+    secretName: staging-call-intelligence-tls
+
+hpa:
+  enabled: false
+
+config:
+  corsOrigins: "https://staging-calls.example.com"
+  logLevel: DEBUG

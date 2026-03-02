@@ -1,0 +1,46 @@
+{{- if .Values.hpa.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "call-intelligence.fullname" . }}-api-gateway
+  labels:
+    {{- include "call-intelligence.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api-gateway
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "call-intelligence.fullname" . }}-api-gateway
+  minReplicas: {{ .Values.hpa.apiGateway.minReplicas }}
+  maxReplicas: {{ .Values.hpa.apiGateway.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.apiGateway.targetCPUUtilization }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "call-intelligence.fullname" . }}-call-handler
+  labels:
+    {{- include "call-intelligence.labels" . | nindent 4 }}
+    app.kubernetes.io/component: call-handler
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "call-intelligence.fullname" . }}-call-handler
+  minReplicas: {{ .Values.hpa.callHandler.minReplicas }}
+  maxReplicas: {{ .Values.hpa.callHandler.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.hpa.callHandler.targetCPUUtilization }}
+{{- end }}
